@@ -39,6 +39,6 @@ class Sound_Source(ContextManager):
     def __exit__(self):
         self._stream.stop()    
         
-with Sound_Source() as source:
-    while True:
-        print(source.queue.get() )
+# with Sound_Source() as source:
+#     while True:
+#         print(source.queue.get() )
