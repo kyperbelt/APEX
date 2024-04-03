@@ -2,6 +2,7 @@ from typing import ContextManager
 import sounddevice as sd
 import numpy as np
 import queue
+import pickle
 
 class Sound_Source(ContextManager):
     """
@@ -36,9 +37,5 @@ class Sound_Source(ContextManager):
         self._stream.start()
         return self
         
-    def __exit__(self):
-        self._stream.stop()    
-        
-# with Sound_Source() as source:
-#     while True:
-#         print(source.queue.get() )
+    def __exit__(self, __exc_type, __exc_value,  __traceback):
+        self._stream.stop()
