@@ -74,6 +74,17 @@ That will launch the server on `localhost:7070`. Checkout the [Api](#api) sectio
     }
 ```
 
+#### Position Info
+* **description**: Returns the current position of the mouse on the screen.
+* **method**: **`GET`** `v1/inav/position`
+* **response**:
+```json
+    {
+        "x": 200, // x position of the mouse
+        "y": 300  // y position of the mouse
+    }
+```
+
 
 ### Easing Functions
 These are the `"function"` properties of most payloads. They are the functions used to interpolate mouse movement.

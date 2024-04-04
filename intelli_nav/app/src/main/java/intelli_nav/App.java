@@ -1,5 +1,6 @@
 package intelli_nav;
 
+import intelli_nav.payload.PositionPayload;
 import io.javalin.Javalin;
 import static io.javalin.apibuilder.ApiBuilder.*;
 
@@ -10,6 +11,9 @@ import intelli_nav.control.ScrollAction;
 import intelli_nav.payload.ClickPayload;
 import intelli_nav.payload.MovePayload;
 import intelli_nav.payload.ScrollPayload;
+
+import javax.swing.text.Position;
+import java.awt.*;
 
 public class App {
     public String getGreeting() {
@@ -43,6 +47,14 @@ public class App {
                                 var payload = ctx.bodyAsClass(ScrollPayload.class);
                                 robotManager.addAction(new ScrollAction(payload));
                                 ctx.status(200);
+                            });
+                        });
+                        path("position", () -> {
+                            get(ctx -> {
+                                PositionPayload payload = new PositionPayload(0, 0);
+                                payload.setX((int) MouseInfo.getPointerInfo().getLocation().getX());
+                                payload.setY((int) MouseInfo.getPointerInfo().getLocation().getY());
+                                ctx.json(payload);
                             });
                         });
                     });
