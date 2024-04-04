@@ -9,6 +9,7 @@ pip install pyautogui==0.9.53
 import cv2
 import mediapipe as mp
 import pyautogui
+import subprocess
 
 # Capture video feed
 cam = cv2.VideoCapture(0)
@@ -63,6 +64,7 @@ while True:
            print("Wink")
         elif (right[0].y - right[1].y < 0.009):
            print("New Wink")
+           subprocess.run(['python3', 'newstt.py'])
            pyautogui.sleep(1)
 
     # print(landmark_points)
