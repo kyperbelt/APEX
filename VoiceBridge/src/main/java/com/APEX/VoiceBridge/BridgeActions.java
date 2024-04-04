@@ -32,6 +32,7 @@ public class BridgeActions {
         payload.put("speed", 100);
         payload.put("x", this.xPos);
         payload.put("y", this.yPos - MOVE_SIZE);
+        this.yPos -= MOVE_SIZE;
         payload.put("display", 0);
         apiPostRequest("/move", payload);
     }
@@ -43,6 +44,7 @@ public class BridgeActions {
         payload.put("speed", 100);
         payload.put("x", this.xPos);
         payload.put("y", this.yPos + MOVE_SIZE);
+        this.yPos += MOVE_SIZE;
         payload.put("display", 0);
         apiPostRequest("/move", payload);
     }
@@ -54,6 +56,7 @@ public class BridgeActions {
         payload.put("speed", 100);
         payload.put("x", this.xPos - MOVE_SIZE);
         payload.put("y", this.yPos);
+        this.xPos -= MOVE_SIZE;
         payload.put("display", 0);
         apiPostRequest("/move", payload);
     }
@@ -65,6 +68,7 @@ public class BridgeActions {
         payload.put("speed", 100);
         payload.put("x", this.xPos + MOVE_SIZE);
         payload.put("y", this.yPos);
+        this.xPos += MOVE_SIZE;
         payload.put("display", 0);
         apiPostRequest("/move", payload);
     }
@@ -82,8 +86,8 @@ public class BridgeActions {
         JSONObject payload = new JSONObject();
         payload.put("button", "LEFT");
         payload.put("function", "CUBIC");
-        payload.put("x", 200);
-        payload.put("y", 300);
+        payload.put("x", xPos);
+        payload.put("y", yPos);
         payload.put("delay", 0);
         apiPostRequest(endpoint, payload);
     }
@@ -93,24 +97,28 @@ public class BridgeActions {
         JSONObject payload = new JSONObject();
         payload.put("button", "RIGHT");
         payload.put("function", "CUBIC");
-        payload.put("x", 200);
-        payload.put("y", 300);
+        payload.put("x", xPos);
+        payload.put("y", yPos);
         payload.put("delay", 0);
         apiPostRequest(endpoint, payload);
     }
 
     public void cursorClickMiddle() {
-        /*
-        {
-            "amount": 100,  // amount of notches to scroll by (positive values are down, and negative values are up)
-            "function": "LINEAR", // easing function
-            "speed": 30 // notches per second
-        }
-         */
+        /* In case we want to middle click w/ cursor movements for scrolling */
+    }
+
+    public void cursorScrollUp() {
+        String endpoint = "/scroll";
+        JSONObject payload = new JSONObject();
+        payload.put("amount", -100);
+        payload.put("speed", 30);
+        apiPostRequest(endpoint, payload);
+    }
+
+    public void cursorScrollDown() {
         String endpoint = "/scroll";
         JSONObject payload = new JSONObject();
         payload.put("amount", 100);
-        payload.put("function", "LINEAR");
         payload.put("speed", 30);
         apiPostRequest(endpoint, payload);
     }
