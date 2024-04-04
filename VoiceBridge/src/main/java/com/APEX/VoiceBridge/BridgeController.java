@@ -75,25 +75,11 @@ public class BridgeController {
     public String convertVoiceToCommand(String voiceString) {
         String normalizedVoiceString = voiceString.toLowerCase();
 
-        Map<String, String> bestCandidate = fuzzyFindStrategy(normalizedVoiceString);
-        int bestScore = Integer.parseInt(bestCandidate.get("best"));
-        int perfectCount = Integer.parseInt(bestCandidate.get("perfects"));
-        String bestCommand = bestCandidate.get("command");
+        return fuzzyFindStrategy(normalizedVoiceString);
 
-        if (bestScore <= 50 || perfectCount > 1) {
-            logger.warn("Unknown command: {}:{}", bestScore, bestCommand);
-            return "UNKNOWN_COMMAND";
-        } else {
-            Runnable action = this.bridgeMapping.get(bestCommand);
-            if (action != null) {
-                logger.info("Executing action for command: {}:{}", bestScore, bestCommand);
-                action.run();
-            }
-            return bestCommand;
-        }
     }
 
-    public Map<String, String> fuzzyFindStrategy(String normalizedString) {
+    public String fuzzyFindStrategy(String normalizedString) {
         int score;
         int bestScore = 0;
         int perfectCount = 0;
@@ -107,14 +93,25 @@ public class BridgeController {
                 bestScore = score;
                 normalizedString = key;
             }
-            logger.info("{}:{}", score, key);
+            logger.info("[{}:{}]", score, key);
         }
 
-        Map<String, String> results = new HashMap<>();
-        results.put("best", String.valueOf(bestScore));
-        results.put("perfects", String.valueOf(perfectCount));
-        results.put("command", normalizedString);
+        String bestCommand = normalizedString;
 
-        return results;
+        // Eye-test for filtering out bad voice inputs
+        // Score < 50 for all means that nothing remotely matches. Tune this value
+        // Having more than 1 perfect match means an incomplete command - each command action is unique
+        // Having a length > 50 means that the SST service gathered too much speech
+        if (bestScore <= 75 || perfectCount > 1 || bestCommand.length() > 100) {
+            logger.warn("Unknown command: [{}:{}]", bestScore, bestCommand);
+            return "UNKNOWN_COMMAND";
+        } else {
+            Runnable action = this.bridgeMapping.get(bestCommand);
+            if (action != null) {
+                logger.info("Executing action for command: [{}:{}]", bestScore, bestCommand);
+                action.run();
+            }
+            return bestCommand;
+        }
     }
 }
