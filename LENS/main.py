@@ -56,13 +56,15 @@ while True:
         # print((left[0].y - left[1].y), (right[0].y - right[1].y))
         if (left[0].y - left[1].y < 0.009) and (right[0].y - right[1].y < 0.009):
            print("Blink")
+           pyautogui.sleep(1)
         elif (left[0].y - left[1].y < 0.009):
            pyautogui.click()
            pyautogui.sleep(1)
            print("Wink")
-        elif (right[0].y - left[1].y < 0.009):
+        elif (right[0].y - right[1].y < 0.009):
            print("New Wink")
+           pyautogui.sleep(1)
 
     # print(landmark_points)
-    cv2.imshow('Eye Controlled Mouse', frame)
+    # cv2.imshow('Eye Controlled Mouse', frame)
     cv2.waitKey(1)
