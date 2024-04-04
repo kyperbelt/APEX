@@ -4,35 +4,69 @@ import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 public class BridgeActions {
-    int[] position = {0, 0};
+    int xPos, yPos;
+    int MOVE_SIZE = 50;
 
     URI uri = new URI("http://localhost:7070/v1/inav");
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     public BridgeActions() throws URISyntaxException {
         this.restTemplate = new RestTemplate();
     }
 
     public void cursorMoveUp() {
-
+        /*{
+            "function": "LINEAR", // easing function
+            "speed": 100,       // speed of mouse in pixels if function is other than NONE
+            "x": 300,           // x position to move to on the given display
+            "y": 200,           // y position to move to on the given display
+            "display" : 0       // display to move to <if multiple displays present>
+        }*/
+        this.getPosition();
+        JSONObject payload = new JSONObject();
+        payload.put("function", "CUBIC");
+        payload.put("speed", 100);
+        payload.put("x", this.xPos);
+        payload.put("y", this.yPos - MOVE_SIZE);
+        payload.put("display", 0);
+        apiPostRequest("/move", payload);
     }
 
     public void cursorMoveDown() {
-
+        this.getPosition();
+        JSONObject payload = new JSONObject();
+        payload.put("function", "CUBIC");
+        payload.put("speed", 100);
+        payload.put("x", this.xPos);
+        payload.put("y", this.yPos + MOVE_SIZE);
+        payload.put("display", 0);
+        apiPostRequest("/move", payload);
     }
 
     public void cursorMoveLeft() {
-
+        this.getPosition();
+        JSONObject payload = new JSONObject();
+        payload.put("function", "CUBIC");
+        payload.put("speed", 100);
+        payload.put("x", this.xPos - MOVE_SIZE);
+        payload.put("y", this.yPos);
+        payload.put("display", 0);
+        apiPostRequest("/move", payload);
     }
 
     public void cursorMoveRight() {
-
+        this.getPosition();
+        JSONObject payload = new JSONObject();
+        payload.put("function", "CUBIC");
+        payload.put("speed", 100);
+        payload.put("x", this.xPos + MOVE_SIZE);
+        payload.put("y", this.yPos);
+        payload.put("display", 0);
+        apiPostRequest("/move", payload);
     }
 
     public void cursorClickLeft() {
@@ -79,6 +113,12 @@ public class BridgeActions {
         payload.put("function", "LINEAR");
         payload.put("speed", 30);
         apiPostRequest(endpoint, payload);
+    }
+
+    public void getPosition() {
+        JSONObject result = apiGetRequest("/position");
+        this.xPos = result.getInt("x");
+        this.yPos = result.getInt("y");
     }
 
     // Generic API call
