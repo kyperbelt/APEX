@@ -1,16 +1,23 @@
 package com.APEX.VoiceBridge;
 
+import me.xdrop.fuzzywuzzy.FuzzySearch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 public class BridgeController {
+    private static final Logger logger = LoggerFactory.getLogger(BridgeController.class);
     private String voiceString;
     private String commandString;
 
@@ -18,7 +25,7 @@ public class BridgeController {
 
     private final Map<String, Runnable> bridgeMapping;
 
-    public BridgeController() {
+    public BridgeController() throws URISyntaxException {
         this.voiceString = "";
         this.commandString = "";
         this.bridgeActions = new BridgeActions();
@@ -28,19 +35,27 @@ public class BridgeController {
 
     @GetMapping("/voice")
     public ResponseEntity<?> getVoice() {
-        return ResponseEntity.ok(voiceString);
+        Map<String, String> response = new HashMap<>();
+        response.put("voice", voiceString);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/voice")
-    public ResponseEntity<?> setVoice(String voiceString) {
+    public ResponseEntity<?> setVoice(@RequestBody String voiceString) {
         this.voiceString = voiceString;
         this.commandString = convertVoiceToCommand(this.voiceString);
-        return ResponseEntity.ok(voiceString);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("voice", voiceString);
+        response.put("command", commandString);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/command")
     public ResponseEntity<?> getCommand() {
-        return ResponseEntity.ok(commandString);
+        Map<String, String> response = new HashMap<>();
+        response.put("command", commandString);
+        return ResponseEntity.ok(response);
     }
 
     private void initializeBridgeMapping() {
@@ -51,6 +66,7 @@ public class BridgeController {
         bridgeMapping.put("cursor click left", bridgeActions::cursorClickLeft);
         bridgeMapping.put("cursor click right", bridgeActions::cursorClickRight);
         bridgeMapping.put("cursor click middle", bridgeActions::cursorClickMiddle);
+        logger.info(bridgeMapping.keySet().toString());
     }
 
     // Acts like a passthrough for now - assumes that incoming voice strings are perfect
@@ -58,11 +74,47 @@ public class BridgeController {
     // For non-AI, maybe add some sort of fuzzy string matching
     public String convertVoiceToCommand(String voiceString) {
         String normalizedVoiceString = voiceString.toLowerCase();
-        Runnable action = this.bridgeMapping.get(normalizedVoiceString);
-        if (action != null) {
-            action.run();
-            return normalizedVoiceString;
+
+        Map<String, String> bestCandidate = fuzzyFindStrategy(normalizedVoiceString);
+        int bestScore = Integer.parseInt(bestCandidate.get("best"));
+        int perfectCount = Integer.parseInt(bestCandidate.get("perfects"));
+        String bestCommand = bestCandidate.get("command");
+
+        if (bestScore <= 50 || perfectCount > 1) {
+            logger.warn("Unknown command: {}:{}", bestScore, bestCommand);
+            return "UNKNOWN_COMMAND";
+        } else {
+            Runnable action = this.bridgeMapping.get(bestCommand);
+            if (action != null) {
+                logger.info("Executing action for command: {}:{}", bestScore, bestCommand);
+                action.run();
+            }
+            return bestCommand;
         }
-        return "UNKNOWN_COMMAND";
+    }
+
+    public Map<String, String> fuzzyFindStrategy(String normalizedString) {
+        int score;
+        int bestScore = 0;
+        int perfectCount = 0;
+        for (String key : bridgeMapping.keySet()) {
+            score = FuzzySearch.tokenSetRatio(voiceString, key);
+            if (score == 100) {
+                perfectCount++;
+            }
+
+            if (score > bestScore) {
+                bestScore = score;
+                normalizedString = key;
+            }
+            logger.info("{}:{}", score, key);
+        }
+
+        Map<String, String> results = new HashMap<>();
+        results.put("best", String.valueOf(bestScore));
+        results.put("perfects", String.valueOf(perfectCount));
+        results.put("command", normalizedString);
+
+        return results;
     }
 }
