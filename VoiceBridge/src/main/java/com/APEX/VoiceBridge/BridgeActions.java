@@ -1,6 +1,8 @@
 package com.APEX.VoiceBridge;
 
 public class BridgeActions {
+    int[] position = {0,0};
+
     public void cursorMoveUp() {
 
     }

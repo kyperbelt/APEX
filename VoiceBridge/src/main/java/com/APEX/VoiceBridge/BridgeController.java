@@ -16,14 +16,14 @@ public class BridgeController {
 
     private final BridgeActions bridgeActions;
 
-    private Map<String, Runnable> bridgeMapping;
+    private final Map<String, Runnable> bridgeMapping;
 
     public BridgeController() {
         this.voiceString = "";
         this.commandString = "";
         this.bridgeActions = new BridgeActions();
         this.bridgeMapping = new HashMap<>();
-
+        this.initializeBridgeMapping();
     }
 
     @GetMapping("/voice")
@@ -34,6 +34,7 @@ public class BridgeController {
     @PostMapping("/voice")
     public ResponseEntity<?> setVoice(String voiceString) {
         this.voiceString = voiceString;
+        this.commandString = convertVoiceToCommand(this.voiceString);
         return ResponseEntity.ok(voiceString);
     }
 
@@ -43,12 +44,25 @@ public class BridgeController {
     }
 
     private void initializeBridgeMapping() {
-        bridgeMapping.put("Cursor move up", bridgeActions::cursorMoveUp);
-        bridgeMapping.put("Cursor move down", bridgeActions::cursorMoveDown);
-        bridgeMapping.put("Cursor move left", bridgeActions::cursorMoveLeft);
-        bridgeMapping.put("Cursor move right", bridgeActions::cursorMoveRight);
-        bridgeMapping.put("Cursor click left", bridgeActions::cursorClickLeft);
-        bridgeMapping.put("Cursor click right", bridgeActions::cursorClickRight);
-        bridgeMapping.put("Cursor click middle", bridgeActions::cursorClickMiddle);
+        bridgeMapping.put("cursor move up", bridgeActions::cursorMoveUp);
+        bridgeMapping.put("cursor move down", bridgeActions::cursorMoveDown);
+        bridgeMapping.put("cursor move left", bridgeActions::cursorMoveLeft);
+        bridgeMapping.put("cursor move right", bridgeActions::cursorMoveRight);
+        bridgeMapping.put("cursor click left", bridgeActions::cursorClickLeft);
+        bridgeMapping.put("cursor click right", bridgeActions::cursorClickRight);
+        bridgeMapping.put("cursor click middle", bridgeActions::cursorClickMiddle);
+    }
+
+    // Acts like a passthrough for now - assumes that incoming voice strings are perfect
+    // Add AI here (if we're still doing that)
+    // For non-AI, maybe add some sort of fuzzy string matching
+    public String convertVoiceToCommand(String voiceString) {
+        String normalizedVoiceString = voiceString.toLowerCase();
+        Runnable action = this.bridgeMapping.get(normalizedVoiceString);
+        if (action != null) {
+            action.run();
+            return normalizedVoiceString;
+        }
+        return "UNKNOWN_COMMAND";
     }
 }
