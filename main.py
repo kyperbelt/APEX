@@ -1,5 +1,267 @@
 import pyautogui
 import time
+import speech_recognition as sr
+import webbrowser
+import openai
+import sys
+import os
+
+# Speech to text implementation
+def gpt(text=''):
+    # Initialize the OpenAI API client with your API key
+    api_key = ''
+    openai.api_key = api_key
+
+    # Call the GPT-4 model to generate code
+    response = openai.Completion.create(
+        engine="text-davinci-003",  # GPT-4 engine
+        prompt=text,
+        max_tokens=100,  # Maximum number of tokens to generate
+        n=1,  # Number of completions to generate
+        stop="\n",  # Stop generating after reaching newline
+        temperature=0.7  # Controls randomness of generation
+    )
+
+    # Extract and return the generated code
+    # return response.choices[0].text.strip()
+def zoom_in(scale=''):
+    scale = scale.strip()
+    if scale == 'one':
+        zoom = 1
+    elif scale == 'two':
+        zoom = 2
+    elif scale == 'three':
+        zoom = 3
+    elif scale == 'four':
+        zoom = 4
+    elif scale == 'five':
+        zoom = 5
+    elif scale == 'six':
+        zoom = 6
+    else:
+        zoom = 1
+
+    for _ in range(zoom):
+        pyautogui.keyDown('command')
+        pyautogui.press('+')
+        pyautogui.keyUp('command')
+
+def zoom_out(scale=''):
+    scale = scale.strip()
+    if scale == 'one':
+        zoom = 1
+    elif scale == 'two':
+        zoom = 2
+    elif scale == 'three':
+        zoom = 3
+    elif scale == 'four':
+        zoom = 4
+    elif scale == 'five':
+        zoom = 5
+    elif scale == 'six':
+        zoom = 6
+    else:
+        zoom = 1
+
+    for _ in range(zoom):
+        pyautogui.keyDown('command')
+        pyautogui.press('-')
+        pyautogui.keyUp('command')
+
+
+def open_youtube():
+    # URL of YouTube
+    youtube_url = "https://www.youtube.com"
+    # Open YouTube in the default web browser
+    webbrowser.open(youtube_url)
+
+def search_youtube(query):
+    # URL of YouTube
+    youtube_url = "https://www.youtube.com"
+    search_url = f"{youtube_url}/results?search_query={query}"
+    # Open YouTube in the default web browser with search query
+    webbrowser.open(search_url)
+
+def open_netflix():
+    # URL of Netflix
+    netflix_url = "https://www.netflix.com"
+    # Open Netflix in the default web browser
+    webbrowser.open(netflix_url)
+
+def spell_out(text):
+    # Dictionary mapping letters to words that sound like that letter
+    sound_dict = {
+        'a': ['a', 'hey', 'may'],
+        'b': ['b', 'be', 'bee', 'by'],
+        'c': ['c', 'see', 'sea', 'key', 'knee'],
+        'd': ['d', 'dee', 'die', 'do', 'did'],
+        'e': ['e', 'eat', 'ear', 'east'],
+        'f': ['f', 'eff', 'fee'],
+        'g': ['g', 'gee', 'key'],
+        'h': ['h', 'hay', 'he', 'hi'],
+        'i': ['i', 'eye', 'aye', 'I'],
+        'j': ['j', 'jay', 'g'],
+        'k': ['k', 'kay', 'knee', 'key'],
+        'l': ['l', 'ell', 'el'],
+        'm': ['m', 'em', 'am', 'aim'],
+        'n': ['n', 'en', 'end', 'in'],
+        'o': ['o', 'oh', 'owe'],
+        'p': ['p', 'pee', 'pea', 'pie'],
+        'q': ['q', 'cue', 'queue'],
+        'r': ['r', 'are', 'our'],
+        's': ['s', 'ess', 'sea', 'see', 'yes'],
+        't': ['t', 'tea', 'tee', 'tie'],
+        'u': ['u', 'you', 'ewe'],
+        'v': ['v', 'vee', 'vie'],
+        'w': ['w', 'double you', 'we'],
+        'x': ['x', 'ex', 'axe', 'box'],
+        'y': ['y', 'why', 'eye', 'wye'],
+        'z': ['z', 'zee', 'zed']
+    }
+
+    spell_out_text = ""
+    # Split the input text into individual words
+    words = text.split()
+    print(words)
+    for word in words:
+        # Check if the word exists in the sound_dict values, if yes, append its corresponding key (letter)
+        for letter, sound_words in sound_dict.items():
+            if word in sound_words:
+                spell_out_text += letter
+                break
+        else:
+            # If the word is not found in the dictionary, append it as is
+            spell_out_text += word
+
+    pyautogui.typewrite(spell_out_text)
+
+def type_text(text):
+    pyautogui.typewrite(text)
+
+def recognize_speech_from_microphone():
+    # Initialize the recognizer
+    recognizer = sr.Recognizer()
+
+    # Use the default system microphone as the audio source
+    microphone = sr.Microphone()
+
+    # Adjust for ambient noise before listening
+    with microphone as source:
+        recognizer.adjust_for_ambient_noise(source)
+        print("Listening... (Ctrl+C to stop)")
+
+    while True:
+        with microphone as source:
+            audio_data = recognizer.listen(source)
+
+        try:
+            # Recognize the speech using Google Web Speech API
+            text = recognizer.recognize_google(audio_data)
+            print("Recognized speech:", text)
+
+            text = text.lower()
+            if 'luminous' in text or 'exit' in text or 'back' in text or 'bye' in text:
+                return
+
+            elif 'backspace' in text:
+                # Extract the number of times to backspace from the command
+                backspace_count = int(text.split(' ')[-1])
+                # Perform backspace operation
+                for _ in range(backspace_count):
+                    pyautogui.press('backspace')
+                return
+
+            elif 'code' in text:
+                if text[len('code')+1:]:
+                    gpt(text[len('code')+1:])
+                return
+
+            elif 'zoom in' in text:
+                if 'one' in text or 'won' in text:
+                    scale = 'one'
+                elif 'two' in text or 'too' in text or 'to' in text:
+                    scale = 'two'
+                elif 'three' in text:
+                    scale = 'three'
+                elif 'four'in text or 'for' in text:
+                    scale = 'four'
+                elif 'five' in text:
+                    scale = 'five'
+                elif 'six' in text or 'sex' in text:
+                    scale = 'six'
+                else:
+                    scale = ''
+
+                zoom_in(scale)
+                return
+
+            elif 'zoom out' in text:
+                if 'one' in text or 'won' in text:
+                    scale = 'one'
+                elif 'two' in text or 'too' in text or 'to' in text:
+                    scale = 'two'
+                elif 'three' in text:
+                    scale = 'three'
+                elif 'four' in text or 'for' in text:
+                    scale = 'four'
+                elif 'five' in text:
+                    scale = 'five'
+                elif 'six' in text or 'sex' in text:
+                    scale = 'six'
+                else:
+                    scale = ''
+
+                zoom_out(scale)
+                return
+
+            elif 'open youtube' in text:
+                open_youtube()
+                return
+
+            elif 'search youtube' in text:
+                if text[len('search youtube')+1:]:
+                    # Extract the query from the recognized speech
+                    query = text[len('search youtube')+1:]
+                    search_youtube(query)
+                else:
+                    open_youtube()
+                return
+
+            elif 'open netflix' == text:
+                open_netflix()
+                return
+
+            elif 'type' in text:
+                if text[len('type') + 1:]:
+                    type_text(text[len('type') + 1:])
+                return
+
+            elif 'spell' == text[:len('spell')]:
+                # Need to implement
+                spell_out(text[len('spell')+1:])
+                return
+
+            elif 'command' == text:
+                # Need to implement
+                return
+
+            else:
+                print("No speech detected")
+                return
+
+        except sr.UnknownValueError:
+            print("Could not understand audio")
+            return
+        except sr.RequestError as e:
+            print("Could not request results from Google Web Speech API; {0}".format(e))
+            return
+
+
+'''
+-------------------------------------------------------------------------------------------
+                                          :)
+-------------------------------------------------------------------------------------------
+'''
 
 # Enable Macbook head pointer
 def enable_head_pointer():
@@ -76,19 +338,20 @@ while True:
             right_y = int(right[i].y * frame_h)
             cv2.circle(frame, (left_x, left_y), 3, (0, 255, 0))
             cv2.circle(frame, (right_x, right_y), 3, (0, 0, 255))
-        print("Left: " + str(left[0].y - left[1].y), "Right: " + str(right[0].y - right[1].y))
+        # print("Left: " + str(left[0].y - left[1].y), "Right: " + str(right[0].y - right[1].y))
         if (left[0].y - left[1].y < 0.01) and (right[0].y - right[1].y < 0.01):
-           print("Blink")
-           pyautogui.sleep(1)
+            print("Blink")
+            pyautogui.sleep(1)
         elif (left[0].y - left[1].y < 0.009):
-           pyautogui.click()
-           pyautogui.sleep(1)
-           print("Wink")
+            pyautogui.click()
+            pyautogui.sleep(1)
+            print("Wink")
         elif (right[0].y - right[1].y < 0.004):
-           print("New Wink")
-           subprocess.run(['python3', 'newstt.py'])
-           pyautogui.sleep(1)
+            print("New Wink, activate speech to text")
+            # recognize_speech_from_microphone()
+            pyautogui.sleep(1)
     # print(landmark_points)
     # cv2.imshow('Eye Controlled Mouse', frame)
     cv2.waitKey(1)
+
 
