@@ -10,6 +10,9 @@ import java.net.URISyntaxException;
 public class BridgeActions {
     int xPos, yPos;
     int MOVE_SIZE = 50;
+    int MOVE_SPEED = 100;
+    int SCROLL_SIZE = 10;
+    int SCROLL_SPEED = 30;
 
     URI uri = new URI("http://localhost:7070/v1/inav");
     private final RestTemplate restTemplate;
@@ -29,7 +32,7 @@ public class BridgeActions {
         this.getPosition();
         JSONObject payload = new JSONObject();
         payload.put("function", "CUBIC");
-        payload.put("speed", 100);
+        payload.put("speed", MOVE_SPEED);
         payload.put("x", this.xPos);
         payload.put("y", this.yPos - MOVE_SIZE);
         this.yPos -= MOVE_SIZE;
@@ -41,7 +44,7 @@ public class BridgeActions {
         this.getPosition();
         JSONObject payload = new JSONObject();
         payload.put("function", "CUBIC");
-        payload.put("speed", 100);
+        payload.put("speed", MOVE_SPEED);
         payload.put("x", this.xPos);
         payload.put("y", this.yPos + MOVE_SIZE);
         this.yPos += MOVE_SIZE;
@@ -53,7 +56,7 @@ public class BridgeActions {
         this.getPosition();
         JSONObject payload = new JSONObject();
         payload.put("function", "CUBIC");
-        payload.put("speed", 100);
+        payload.put("speed", MOVE_SPEED);
         payload.put("x", this.xPos - MOVE_SIZE);
         payload.put("y", this.yPos);
         this.xPos -= MOVE_SIZE;
@@ -65,7 +68,7 @@ public class BridgeActions {
         this.getPosition();
         JSONObject payload = new JSONObject();
         payload.put("function", "CUBIC");
-        payload.put("speed", 100);
+        payload.put("speed", MOVE_SPEED);
         payload.put("x", this.xPos + MOVE_SIZE);
         payload.put("y", this.yPos);
         this.xPos += MOVE_SIZE;
@@ -110,8 +113,8 @@ public class BridgeActions {
     public void cursorScrollUp() {
         String endpoint = "/scroll";
         JSONObject payload = new JSONObject();
-        payload.put("amount", -100);
-        payload.put("speed", 30);
+        payload.put("amount", -SCROLL_SIZE);
+        payload.put("speed", SCROLL_SPEED);
         payload.put("function", "LINEAR");
         apiPostRequest(endpoint, payload);
     }
@@ -119,8 +122,8 @@ public class BridgeActions {
     public void cursorScrollDown() {
         String endpoint = "/scroll";
         JSONObject payload = new JSONObject();
-        payload.put("amount", 100);
-        payload.put("speed", 30);
+        payload.put("amount", SCROLL_SIZE);
+        payload.put("speed", SCROLL_SPEED);
         payload.put("function", "LINEAR");
         apiPostRequest(endpoint, payload);
     }
