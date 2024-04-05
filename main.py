@@ -7,23 +7,47 @@ import sys
 import os
 
 # Speech to text implementation
-def gpt(text=''):
-    # Initialize the OpenAI API client with your API key
-    api_key = ''
-    openai.api_key = api_key
 
-    # Call the GPT-4 model to generate code
-    response = openai.Completion.create(
-        engine="text-davinci-003",  # GPT-4 engine
-        prompt=text,
-        max_tokens=100,  # Maximum number of tokens to generate
-        n=1,  # Number of completions to generate
-        stop="\n",  # Stop generating after reaching newline
-        temperature=0.7  # Controls randomness of generation
-    )
+def text_to_number(text=''):
+    if 'one' in text or 'won' in text or '1' in text:
+        scale = 1
+    elif 'two' in text or 'too' in text or 'to' in text or '2' in text:
+        scale = 2
+    elif 'three' in text or '3' in text:
+        scale = 3
+    elif 'four' in text or 'for' in text or '4' in text:
+        scale = 4
+    elif 'five' in text or '5' in text:
+        scale = 5
+    elif 'six' in text or 'sex' in text or '6' in text:
+        scale = 6
+    elif 'seven' in text or '7' in text:
+        scale = 7
+    else:
+        scale = 1
+    return scale
+def open_gpt():
+    url = 'https://chat.openai.com'
+    # Open YouTube in the default web browser
+    webbrowser.open(url)
 
-    # Extract and return the generated code
-    # return response.choices[0].text.strip()
+def scroll_down(text):
+    # Function to scroll down
+    scale = text_to_number(text)
+    pyautogui.scroll(20 * scale)
+
+def scroll_up(text):
+    # Function to scroll down
+    scale = text_to_number(text)
+    pyautogui.scroll(20 * scale)
+
+def turn_up_volume():
+    # Function to turn up the volume (For Mac, it simulates pressing the F12 key)
+    pyautogui.press('f12')
+
+def turn_down_volume():
+    pyautogui.press('f11')
+
 def zoom_in(scale=''):
     scale = scale.strip()
     if scale == 'one':
@@ -138,6 +162,16 @@ def spell_out(text):
 def type_text(text):
     pyautogui.typewrite(text)
 
+def backspace(text):
+    print("text:", text)
+    loops = text_to_number(text)
+    print(loops)
+    for _ in range(loops):
+        print('here')
+        pyautogui.press('backspace')
+        pyautogui.press('delete')
+
+
 def recognize_speech_from_microphone():
     # Initialize the recognizer
     recognizer = sr.Recognizer()
@@ -163,17 +197,30 @@ def recognize_speech_from_microphone():
             if 'luminous' in text or 'exit' in text or 'back' in text or 'bye' in text:
                 return
 
-            elif 'backspace' in text:
-                # Extract the number of times to backspace from the command
-                backspace_count = int(text.split(' ')[-1])
-                # Perform backspace operation
-                for _ in range(backspace_count):
-                    pyautogui.press('backspace')
+            elif 'stingers up' in text:
+                sys.exit()
+
+            elif 'scroll up' in text:
+                scroll_up(text[len('scroll up')+1:])
+                return
+
+            elif 'scroll down' in text:
+                scroll_down(text[len('scroll up')+1:])
+                return
+
+            elif 'delete' in text:
+                print(text[len('delete')+1:])
+                backspace(text[len('delete')+1:])
                 return
 
             elif 'code' in text:
-                if text[len('code')+1:]:
-                    gpt(text[len('code')+1:])
+                print("Want to implement GPT4 soon")
+                '''if text[len('code')+1:]:
+                    gpt(text[len('code')+1:])'''
+                return
+
+            elif 'gpt' in text:
+                open_gpt()
                 return
 
             elif 'zoom in' in text:
@@ -348,7 +395,7 @@ while True:
             print("Wink")
         elif (right[0].y - right[1].y < 0.004):
             print("New Wink, activate speech to text")
-            # recognize_speech_from_microphone()
+            recognize_speech_from_microphone()
             pyautogui.sleep(1)
     # print(landmark_points)
     # cv2.imshow('Eye Controlled Mouse', frame)
