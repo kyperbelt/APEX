@@ -63,8 +63,8 @@ public class BridgeController {
         bridgeMapping.put("cursor move right", bridgeActions::cursorMoveRight);
         bridgeMapping.put("cursor click left", bridgeActions::cursorClickLeft);
         bridgeMapping.put("cursor click right", bridgeActions::cursorClickRight);
-        bridgeMapping.put("cursor scroll up", bridgeActions::cursorScrollUp);
-        bridgeMapping.put("cursor scroll down", bridgeActions::cursorScrollDown);
+        bridgeMapping.put("scroll up", bridgeActions::cursorScrollUp);
+        bridgeMapping.put("scroll down", bridgeActions::cursorScrollDown);
         logger.info(bridgeMapping.keySet().toString());
     }
 
