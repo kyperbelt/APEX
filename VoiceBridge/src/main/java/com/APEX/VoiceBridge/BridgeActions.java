@@ -112,6 +112,7 @@ public class BridgeActions {
         JSONObject payload = new JSONObject();
         payload.put("amount", -100);
         payload.put("speed", 30);
+        payload.put("function", "LINEAR");
         apiPostRequest(endpoint, payload);
     }
 
@@ -120,6 +121,7 @@ public class BridgeActions {
         JSONObject payload = new JSONObject();
         payload.put("amount", 100);
         payload.put("speed", 30);
+        payload.put("function", "LINEAR");
         apiPostRequest(endpoint, payload);
     }
 
