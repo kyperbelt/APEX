@@ -2,12 +2,19 @@ import pyautogui
 import time
 import speech_recognition as sr
 import webbrowser
-import openai
+from gtts import gTTS
 import sys
+import random
+import requests
 import os
 
 # Speech to text implementation
-
+def new_type():
+    for i in range(2):
+        print('clicked')
+        pyautogui.press('command')
+        pyautogui.press('command')
+    time.sleep(1)
 def text_to_number(text=''):
     if 'one' in text or 'won' in text or '1' in text:
         scale = 1
@@ -171,6 +178,12 @@ def backspace(text):
         pyautogui.press('backspace')
         pyautogui.press('delete')
 
+def space(text):
+    loops = text_to_number()
+    print(loops)
+    for _ in range(loops):
+        pyautogui.press('space')
+
 
 def recognize_speech_from_microphone():
     # Initialize the recognizer
@@ -182,7 +195,25 @@ def recognize_speech_from_microphone():
     # Adjust for ambient noise before listening
     with microphone as source:
         recognizer.adjust_for_ambient_noise(source)
-        print("Listening... (Ctrl+C to stop)")
+
+        # Say assisting phrase
+        phrases = [
+            "How can I help you today?",
+            "I'm here to assist you.",
+            "What do you need assistance with?",
+            "How may I be of service?",
+            "How can I assist you today?",
+            "What can I do for you?",
+        ]
+        # Select a random phrase from the list
+        text = random.choice(phrases)
+
+        # Convert text to speech
+        tts = gTTS(text=text, lang='en', slow=False)
+        tts.save("listening.mp3")
+
+        # Play the audio file
+        os.system("afplay listening.mp3")
 
     while True:
         with microphone as source:
@@ -199,6 +230,9 @@ def recognize_speech_from_microphone():
 
             elif 'stingers up' in text:
                 sys.exit()
+
+            elif 'space' in text:
+                space(text[len('space')+1:])
 
             elif 'scroll up' in text:
                 scroll_up(text[len('scroll up')+1:])
@@ -219,7 +253,7 @@ def recognize_speech_from_microphone():
                     gpt(text[len('code')+1:])'''
                 return
 
-            elif 'gpt' in text:
+            elif 'open ai' in text:
                 open_gpt()
                 return
 
@@ -289,13 +323,25 @@ def recognize_speech_from_microphone():
                 return
 
             elif 'command' == text:
-                # Need to implement
-                return
+                url = "http://localhost:8080/voice"
+
+                response = requests.post(url=url, data=text[len('command')+1:])
+
+                if response.status_code == 200:
+                    data = response.json()
+                    print(data)
+                    return data['command']
+                else:
+                    print(f'Request failed for {url} with status code {response.status_code}')
+                    return "NA_COMMAND"
 
             else:
                 print("No speech detected")
                 return
 
+        except sr.WaitTimeoutError:
+            print("Timeout: No speech detected")
+            return
         except sr.UnknownValueError:
             print("Could not understand audio")
             return
@@ -395,8 +441,14 @@ while True:
             print("Wink")
         elif (right[0].y - right[1].y < 0.004):
             print("New Wink, activate speech to text")
-            recognize_speech_from_microphone()
-            pyautogui.sleep(1)
+            '''text
+            tts = gTTS(text=text, lang='en', slow=False)
+            tts.save("listening.mp3")
+            os.system("afplay listening.mp3")'''
+            # recognize_speech_from_microphone()
+            # pyautogui.sleep(1)
+            new_type()
+            # pyautogui.press('f5')
     # print(landmark_points)
     # cv2.imshow('Eye Controlled Mouse', frame)
     cv2.waitKey(1)
