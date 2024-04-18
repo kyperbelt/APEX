@@ -10,11 +10,9 @@ import os
 
 # Speech to text implementation
 def new_type():
-    for i in range(2):
-        print('clicked')
-        pyautogui.press('command')
-        pyautogui.press('command')
+    pyautogui.press('command', presses=2)
     time.sleep(1)
+
 def text_to_number(text=''):
     if 'one' in text or 'won' in text or '1' in text:
         scale = 1
